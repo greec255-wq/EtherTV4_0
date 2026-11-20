@@ -1,3 +1,4 @@
+
 name: Build EtherTV Paper plugin
 
 on:
@@ -49,6 +50,13 @@ jobs:
           test -f project-src/settings.gradle.kts
           test -d project-src/src/main/java
           test -f project-src/libs/CustomDiscs-2.7.0.jar
+
+      - name: Fix Simple Voice Chat API version
+        working-directory: project-src
+        run: |
+          sed -i 's/voicechat-api:2.6.1"/voicechat-api:2.6.27"/g' build.gradle.kts
+          echo "Voice Chat API dependency:"
+          grep "voicechat-api" build.gradle.kts
 
       - name: Set up Java 25
         uses: actions/setup-java@v4
