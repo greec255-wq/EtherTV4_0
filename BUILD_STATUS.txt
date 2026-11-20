@@ -1,0 +1,21 @@
+EtherTV 1.3.0-dev — CustomDiscs television integration source update
+
+Included:
+- CustomDiscTelevisionService listens to CustomDiscs 2.7.0 insert/eject events.
+- Remote YouTube disc identifiers are forwarded to the existing EtherTV Client/Rinku video pipeline.
+- Ejecting the disc stops the browser source and resets the map screen.
+- /ether play and /ether pause are top-level commands.
+- /ether youtube URL/seek/stop command branch removed.
+- Ambiguous helper method registerCommand renamed to registerEtherCommand.
+- Existing camera, screen binding, recipes, models, textures, and channel/network sources retained.
+
+Validation:
+- ZIP extraction and archive integrity: checked during packaging.
+- CustomDiscs API class/method signatures: inspected from bundled CustomDiscs-2.7.0.jar.
+- Resource-pack JSON: validated during packaging.
+- Compilation: NOT RUN (environment Java 21; project requires Java 25; Gradle not installed).
+- Paper runtime tests: NOT RUN.
+- Fabric/Rinku runtime tests: NOT RUN.
+
+Important runtime check:
+- Verify that the DiscEntry.identifier emitted by the server's CustomDiscs 2.7.0 configuration is a YouTube URL or 11-character video ID. The integration accepts either format. Non-YouTube/local discs will continue to be handled by CustomDiscs audio only.

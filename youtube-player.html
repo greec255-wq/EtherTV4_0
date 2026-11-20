@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html,body,#player{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
+    #player iframe{width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+  <script>
+    (() => {
+      let player = null;
+      let pending = null;
+      const emit = (name, data) => {
+        if (window.etherTvBridge && typeof window.etherTvBridge.postMessage === 'function') {
+          window.etherTvBridge.postMessage(JSON.stringify({name, data}));
+        }
+      };
+      window.etherTvLoad = (videoId, startSeconds = 0) => {
+        if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return;
+        if (!window.YT || !window.YT.Player) { pending = {videoId, startSeconds}; return; }
+        if (!player) {
+          player = new YT.Player('player', {
+            width: '640', height: '360', videoId,
+            playerVars: {playsinline: 1, autoplay: 1, controls: 1, rel: 0, enablejsapi: 1, origin: window.location.origin},
+            events: {
+              onReady: e => { if (startSeconds > 0) e.target.seekTo(startSeconds, true); e.target.playVideo(); emit('ready', {}); },
+              onStateChange: e => emit('state', {state: e.data}),
+              onError: e => emit('error', {code: e.data})
+            }
+          });
+        } else {
+          player.loadVideoById({videoId, startSeconds});
+        }
+      };
+      window.etherTvPlay = () => player && player.playVideo();
+      window.etherTvPause = () => player && player.pauseVideo();
+      window.etherTvSeek = seconds => player && player.seekTo(Math.max(0, Number(seconds) || 0), true);
+      window.etherTvMute = muted => player && (muted ? player.mute() : player.unMute());
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+      window.onYouTubeIframeAPIReady = () => { if (pending) { const p = pending; pending = null; window.etherTvLoad(p.videoId, p.startSeconds); } };
+    })();
+  </script>
+</body>
+</html>
